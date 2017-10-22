@@ -18,8 +18,6 @@ public class Main {
 	private static final Logger log = Logger.getLogger(Main.class.getSimpleName());
 	
 	public static void main(String[] args) {
-		Server server = null;
-		Device device = null;
 		ServerClient bridge = null;
 		EventDispatcher dispatcher = null;
 		
@@ -32,6 +30,12 @@ public class Main {
 			String line = reader.readLine();
 			while(!line.equals("exit")){
 				if(line.equals("bridge")){
+					if(bridge != null){
+						bridge.stop();
+						dispatcher.stop();
+						bridge = null;
+						dispatcher = null;
+					}
 					bridge = new ServerClient(new MessageReaderFactory(),
 							new MessageWriterFactory());
 					IMessageRouter messageRouter = new MessageRouter();
@@ -45,44 +49,14 @@ public class Main {
 					line = reader.readLine();
 					bridge.createServer(Integer.parseInt(line));
 				}
-				if(line.equals("start server")){
-					System.out.println("Insert port:");
-					line = reader.readLine();
-					server = new Server();
-					server.startServer(Integer.parseInt(line));
-				}
-				if(line.equals("stop server")){
-					if(server != null){
-						server.stopServer();
+				if(line.equals("stop bridge")){
+					if(bridge != null){
+						bridge.stop();
+						dispatcher.stop();
+						bridge = null;
+						dispatcher = null;
 					}
 				}
-				if(line.equals("start connection")){
-					System.out.println("Insert port:");
-					line = reader.readLine();
-					device = new Device();
-					device.connect(new InetSocketAddress("localhost", Integer.parseInt(line)));	
-				}
-				if(line.equals("stop connection")){
-					System.out.println("Insert port:");
-					line = reader.readLine();
-					
-					if(device != null){
-						device.disconnect();
-					}
-				}
-				if(line.equals("send")){
-					System.out.println("Insert messagge:");
-					line = reader.readLine();
-					
-					MqttConnectMessage message = MqttMessageBuilders
-							.connect()
-								.cleanSession(true)
-								.clientId("SampleClient")
-								.keepAlive(60)
-							.build();
-					device.sendMessage(message);
-				}
-				
 				showCommand();
 				line = reader.readLine();
 			}
@@ -90,12 +64,6 @@ public class Main {
 			if(bridge != null){
 				dispatcher.stop();
 				bridge.stop();
-			}
-			if(server != null){
-				server.stopServer();
-			}
-			if(device != null && device.isConnected()){
-				device.disconnect();
 			}
 		} catch (IOException e) {
 			log.log(Level.SEVERE, "Main error: ", e);
@@ -112,11 +80,6 @@ public class Main {
 		System.out.println("Exit: exit");
 		System.out.println("Create bridge: bridge");
 		System.out.println("Create service: create service");
-		System.out.println("Create server: start server");
-		System.out.println("Create connection: start connection");
-		System.out.println("Stop connection: stop connection");
-		System.out.println("Stop server: stop server");
-		System.out.println("Send messagge: send");
 	}
 
 }
