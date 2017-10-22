@@ -105,7 +105,7 @@ public class ServerClient implements ICallbackAccept, ICallbackConnect, ICallbac
         workerProcessor.stop();
         
         executor.shutdown();
-        executor.awaitTermination(200, TimeUnit.MILLISECONDS);
+        //executor.awaitTermination(200, TimeUnit.MILLISECONDS);
     }
 
     public void sendMessage(Message message){
